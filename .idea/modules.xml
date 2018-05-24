@@ -6,6 +6,8 @@
       <module fileurl="file://$PROJECT_DIR$/JavaUtil.iml" filepath="$PROJECT_DIR$/JavaUtil.iml" />
       <module fileurl="file://$PROJECT_DIR$/ReplaceDrawable/ModifyDrawable.iml" filepath="$PROJECT_DIR$/ReplaceDrawable/ModifyDrawable.iml" />
       <module fileurl="file://$PROJECT_DIR$/NetRequest/NetRequest.iml" filepath="$PROJECT_DIR$/NetRequest/NetRequest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SearchChineaseComments/SearchChineaseComments.iml" filepath="$PROJECT_DIR$/SearchChineaseComments/SearchChineaseComments.iml" />
+      <module fileurl="file://$PROJECT_DIR$/utilLibs/utilLibs.iml" filepath="$PROJECT_DIR$/utilLibs/utilLibs.iml" />
     </modules>
   </component>
 </project>
