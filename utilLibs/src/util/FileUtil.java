@@ -96,4 +96,46 @@ public class FileUtil {
         return false;
     }
 
+    public static boolean copyFile(String oriPath, String tarPath){
+        return copyFile(oriPath, tarPath, true);
+    }
+
+    public static boolean copyFile(String oriPath, String tarPath, boolean isRewrite){
+        try {
+            FileInputStream oriFileStream=new FileInputStream(oriPath);
+            File tarFile=new File(tarPath);
+            String parent = tarFile.getParent();
+            File parentFile=new File(parent);
+            if (!parentFile.exists()){
+                parentFile.mkdirs();
+            }
+            if (isRewrite) {
+                if (tarFile.exists()) {
+                    tarFile.delete();
+                }
+                tarFile.createNewFile();
+            }else{
+                if (tarFile.exists()){
+                    return false;
+                }
+            }
+            FileOutputStream tarFileStream=new FileOutputStream(tarPath);
+            byte[] temp=new byte[1024];
+            int len = -1;
+            int length=0;
+            while((len=oriFileStream.read(temp,0,temp.length))!=-1){
+                tarFileStream.write(temp, 0, len);
+                tarFileStream.flush();
+                length+=len;
+            }
+            oriFileStream.close();
+            tarFileStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
