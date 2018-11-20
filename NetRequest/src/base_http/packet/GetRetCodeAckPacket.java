@@ -20,8 +20,8 @@ public class GetRetCodeAckPacket implements Serializable {
         JSONObject json = new JSONObject(responseBody);
         mRetCode = json.optInt("rcode");
 
-        LogUtil.LogShow("GetRetCodeAckPacket", "parse mRetCode = " + mRetCode);
-        LogUtil.LogShow("GetRetCodeAckPacket", "parse responseBody = " + responseBody);
+        LogUtil.LogShow("GetRetCodeAckPacket", "event mRetCode = " + mRetCode);
+        LogUtil.LogShow("GetRetCodeAckPacket", "event responseBody = " + responseBody);
         JSONArray array = json.optJSONArray("data");
         if(array != null){
             mRetCodeMap = new HashMap<Integer, String>();

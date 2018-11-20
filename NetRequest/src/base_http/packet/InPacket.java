@@ -42,12 +42,12 @@ public abstract class InPacket{
             mMsg = json.optString("other");
         }
 
-        LogUtil.LogShow("test", "InPacket parse mRetCode = " + mRetCode + ", mMsg = " + mMsg);
+        LogUtil.LogShow("test", "InPacket event mRetCode = " + mRetCode + ", mMsg = " + mMsg);
 
         JSONObject dataObj = json.optJSONObject("data");
         if(dataObj != null){
 
-            LogUtil.LogShow("test", "InPacket parse dataObj = " + dataObj);
+            LogUtil.LogShow("test", "InPacket event dataObj = " + dataObj);
 
             parseBody(dataObj);
         }
