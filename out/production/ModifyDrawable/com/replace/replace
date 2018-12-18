@@ -1,0 +1,11 @@
+bean=FileBean{head='删除)login_delete_pressed', id='0', last='png', oldName='删除', newName='login_delete_pressed'}
+bean=FileBean{head='删除_pre)login_delete_pressed', id='1', last='png', oldName='删除_pre', newName='login_delete_pressed'}
+bean=FileBean{head='密码_pre)register_password', id='3', last='png', oldName='密码_pre', newName='register_password'}
+bean=FileBean{head='手机图标_pre)register_photo', id='5', last='png', oldName='手机图标_pre', newName='register_photo'}
+bean=FileBean{head='登录_密码)login_password_normal', id='6', last='png', oldName='登录_密码', newName='login_password_normal'}
+bean=FileBean{head='登录_密码_pre)login_password_pressed', id='7', last='png', oldName='登录_密码_pre', newName='login_password_pressed'}
+bean=FileBean{head='登录_手机)login_photo_normal', id='8', last='png', oldName='登录_手机', newName='login_photo_normal'}
+bean=FileBean{head='登录_手机_pre)login_photo_pressed', id='9', last='png', oldName='登录_手机_pre', newName='login_photo_pressed'}
+bean=FileBean{head='返回)back_btn_noamal', id='10', last='png', oldName='返回', newName='back_btn_noamal'}
+bean=FileBean{head='返回_pre)back_btn_pressed', id='11', last='png', oldName='返回_pre', newName='back_btn_pressed'}
+bean=FileBean{head='验证码)register_code', id='12', last='png', oldName='验证码', newName='register_code'}

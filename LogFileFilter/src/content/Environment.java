@@ -48,7 +48,7 @@ public class Environment implements LogReadCallback{
         readAll=new LogRead(readFileName);
         writeAll=new WriteAllRunnable(readAll, Config.getOutPath());
         writeAll.run();
-        Log.i("合并文件来自："+readFileName);
+        Log.i("合并文件来自："+readFileName+", 剩余数量="+threadCount.decrementAndGet());
 /*        while (true){
             if (threadCount.decrementAndGet()<=0){
                 writeAll.run();
