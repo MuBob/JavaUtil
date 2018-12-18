@@ -50,6 +50,7 @@ public class ReadFilterRunnable extends LogRead implements Runnable, LogReadCall
                 break;
             }
         }
+        Thread.currentThread().interrupt();
     }
 
     /**
