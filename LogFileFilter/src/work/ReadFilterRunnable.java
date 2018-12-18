@@ -69,7 +69,6 @@ public class ReadFilterRunnable extends LogRead implements Runnable, LogReadCall
                 sleepThread();
             }else if (rState==1){
                 //上级正在等待给上级的上级提交中。我先给上级提交
-
                 ReadAllRunnable readAll=new ReadAllRunnable(readFileName, writeFilter, callback);
                 readAll.run();
                 break;
