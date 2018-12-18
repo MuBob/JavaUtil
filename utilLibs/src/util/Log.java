@@ -45,4 +45,25 @@ public class Log {
         System.out.println(getCurrentTime()+" "+getCallName()+" Debug:"+msg);
     }
 
+    static StringBuffer sb;
+    static long all;
+    public static void p(long a){
+        sb=new StringBuffer();
+        all=a;
+        System.out.println("当前进度:");
+    }
+
+    public static void pp(long cur) throws Exception {
+        if (sb==null){
+            throw new Exception("需要先调用Log.p()方法");
+        }
+        float per=cur/all;
+        for (int i = 0; i <= per*100; i++) {
+            sb.append("*");
+        }
+        sb.append("("+(per*100)+"%)\r");
+        System.out.print(sb.toString());
+
+    }
+
 }

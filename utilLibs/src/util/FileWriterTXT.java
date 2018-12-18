@@ -11,13 +11,17 @@ public class FileWriterTXT {
     private File file;
 
     public FileWriterTXT(String filePath) {
+        this(filePath, false);
+    }
+
+    public FileWriterTXT(String filePath, boolean isAppend) {
         this.file = new File(filePath);
         String parent = file.getParent();
         File parentFile=new File(parent);
         if (!parentFile.exists()){
             parentFile.mkdirs();
         }
-        if (file.exists()){
+        if (!isAppend&&file.exists()){
             file.delete();
         }
         try {
@@ -33,5 +37,15 @@ public class FileWriterTXT {
         writer.write("\r\n");
         writer.flush();
         writer.close();
+    }
+
+    public void clear(){
+        if (file!=null&&file.exists()){
+            file.delete();
+        }
+    }
+
+    public String getOutFileName(){
+        return file.getAbsolutePath();
     }
 }

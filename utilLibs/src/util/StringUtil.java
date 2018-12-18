@@ -42,4 +42,16 @@ public class StringUtil {
         return isN;
     }
 
+    public static long getHeadNumber(String str){
+        StringBuffer sb=new StringBuffer();
+        for (int j = 0; j < str.length(); j++) {
+            char c = str.charAt(j);
+            if (Character.isDigit(c)){
+                sb.append(c);
+            }else {
+                break;
+            }
+        }
+        return Long.parseLong(sb.toString());
+    }
 }
