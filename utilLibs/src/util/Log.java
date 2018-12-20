@@ -16,7 +16,7 @@ public class Log {
 
 
 
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
 
     private static String getCurrentTime(){
         return simpleDateFormat.format(new Date(System.currentTimeMillis()))+" Frome ";

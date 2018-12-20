@@ -1,10 +1,12 @@
 package work;
 
 import util.Log;
+import work.inter.LogLineCallback;
+import work.inter.LogReadCallback;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import static work.ReadState.*;
 
-public class ReadFilterRunnable extends LogRead implements Runnable, LogReadCallback{
+public class ReadFilterRunnable extends LogRead implements Runnable, LogReadCallback, LogLineCallback {
     private LogFilter filter;
     private LogWrite writeFilter;
     private long readLineFrom;
@@ -20,80 +22,119 @@ public class ReadFilterRunnable extends LogRead implements Runnable, LogReadCall
         this.callback=logCallback;
     }
 
-    public void readFile(long from, long length){
-        for (long i = 0; i < length; i++) {
-            String lineStr = getLineStr(from+i);
-            if (lineStr!=null&&lineStr.contains(filter.getMatchWord())){
-                writeFilter.writeLine(lineStr);
-            }
-        }
-    }
 
     @Override
     public void run() {
-        readState.set(0);
-        readFile(readLineFrom, readLineLength);
+        readState.set(STATE_DO_MYSELF);
+        readLines(readLineFrom, readLineLength, this);
+    }
+
+    @Override
+    public void onReadLine(String fileName, int line, String content) {
+        if (content!=null&&content.contains(filter.getMatchWord())){
+            writeFilter.writeLine(line+" "+content);
+        }
+    }
+    @Override
+    public void afterReadLine(String fileName, int lines) {
+        setState(this, STATE_POST_PARENT);
         if (callback!=null){
             //还要给上级汇报，继续做
             callback.onComplete(this, writeFilter.getOutName());
         }
-        //给上级的做完了
-        readState.set(2);
+        while(getState(this)==STATE_FULL_RECEIVE_CHILD){
+
+        }
+        setState(this, STATE_EMPTY_WAIT_CHILD);
         //那我自己可以清空文件了，如果下级再有提交直接传给上级
         writeFilter.afterWrite();
-        while (true){
-            //等待下级的提交
-            if (readState.get()<3) {
-                readState.set(3);
-            }else if (readState.get()>3){
-                //下级提交完就退出
-                break;
-            }
-        }
         Thread.currentThread().interrupt();
     }
 
+    @STATE
+    private  int lastState;
     /**
      * 下级Thread完成任务后继续做这些
-     * @param readRunnable
+     * @param myReadRunnable
      * @param readFileName
      */
     @Override
-    public synchronized void onComplete(LogRead readRunnable, String readFileName) {
+    public void onComplete(LogRead myReadRunnable, String readFileName) {
+        lastState=STATE_DEFAULT;
         while (true){
-            int rState = readState.get();
-            Log.i("来自："+readFileName+". 写入状态："+rState+", 上级："+writeFilter.getOutName());
-            if (rState==0){
-                //上级正在做，自己等会,通知我的下级可以先给我提交着
-                readRunnable.readState.set(1);
-                sleepThread();
-            }else if (rState==1){
-                //上级正在等待给上级的上级提交中。我先给上级提交
-                ReadAllRunnable readAll=new ReadAllRunnable(readFileName, writeFilter, callback);
-                readAll.run();
-                break;
-            }else if (rState==2){
-                //上级提交完了，他的文本已经空了，只能写给上级的上级了
-                if (callback!=null) {
-                    callback.onComplete(this, readFileName);
+            synchronized (this) {
+
+                int rState = getState(this);
+                if (lastState != rState) {
+                    Log.i("\t\t\t来自：" + readFileName + ", 状态：" + getStateStr(getState(myReadRunnable)));
+                    Log.i("\t\t\t\t\t上级：" + writeFilter.getOutName() + ". 状态：" + getStateStr(rState));
                 }
-                break;
-            }else if (rState>=3){
-                //上级的提交完了，等待我给他提交，但是提交了也不做，继续上传给上级的上级做
-                if (callback!=null) {
-                    callback.onComplete(this, readFileName);
+                lastState = rState;
+                if (rState == STATE_DO_MYSELF) {
+                    //上级正在做，自己等会,通知我的下级可以先给我提交着
+                    if (getState(myReadRunnable) != STATE_FULL_RECEIVE_CHILD) {
+                        setState(myReadRunnable, STATE_FULL_WAIT_CHILD);
+                    }
+                    continue;
+                } else if (rState == STATE_POST_PARENT) {
+                    //上级正在把他的文件提交到上级的上级线程中，我只能等着了
+                    if (getState(myReadRunnable) != STATE_FULL_RECEIVE_CHILD) {
+                        setState(myReadRunnable, STATE_FULL_WAIT_CHILD);
+                    }
+                    continue;
+                } else if (rState == STATE_EMPTY_WAIT_CHILD) {
+                    //上级提交完了，他的文本已经空了，只能写给上级的上级了
+                    if (getState(myReadRunnable) == STATE_FULL_WAIT_CHILD) {
+                        setState(myReadRunnable, STATE_POST_PARENT);
+                    }
+                    if (getState(myReadRunnable) == STATE_POST_PARENT) {
+                        handlerUp(myReadRunnable, readFileName);
+                        break;
+                    }
+                    continue;
+                } else if (rState == STATE_FULL_WAIT_CHILD) {
+                    //上级正在等待给上级的上级提交中。我先给上级提交
+                    int mState = getState(myReadRunnable);
+                    if (mState == STATE_POST_PARENT || mState == STATE_FULL_WAIT_CHILD) {
+                        writeUp(myReadRunnable, readFileName);
+                    }
+                    continue;
+                } else if (rState == STATE_FULL_RECEIVE_CHILD) {
+                    //do nothing
+                    continue;
+                } else if (rState == STATE_FULL_RECEIVE_CHILD_END) {
+                    //do nothing
+                    setState(ReadFilterRunnable.this, STATE_FULL_WAIT_CHILD);
+                    break;
                 }
-                readState.set(4);
-                break;
             }
         }
     }
 
-    private void sleepThread() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private void writeUp(LogRead myRunnable, String readFileName) {
+        setState(ReadFilterRunnable.this, STATE_FULL_RECEIVE_CHILD);
+        ReadAllRunnable readAll=new ReadAllRunnable(readFileName, new LogLineCallback() {
+            @Override
+            public void onReadLine(String fileName, int line, String content) {
+                writeFilter.writeLine(content);
+            }
+
+            @Override
+            public void afterReadLine(String fileName, int line) {
+                if (getState(ReadFilterRunnable.this)==STATE_FULL_RECEIVE_CHILD){
+                    setState(ReadFilterRunnable.this, STATE_FULL_RECEIVE_CHILD_END);
+                }
+
+            }
+        });
+        readAll.run();
     }
+
+    private void handlerUp(LogRead readRunnable, String readFileName) {
+        if (callback!=null) {
+            callback.onComplete(readRunnable, readFileName);
+        }
+        readRunnable.readState.set(4);
+    }
+
 }

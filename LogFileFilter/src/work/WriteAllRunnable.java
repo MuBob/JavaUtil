@@ -1,22 +1,20 @@
 package work;
 
+import work.inter.LogLineCallback;
+
 public class WriteAllRunnable extends LogWrite implements Runnable {
     private LogRead readLogs;
+    private LogLineCallback lineCallback;
 
-    public WriteAllRunnable(LogRead readLogs, String outName) {
+    public WriteAllRunnable(LogRead readLogs, String outName, LogLineCallback callback) {
         super(outName, true);
         this.readLogs=readLogs;
+        this.lineCallback=callback;
     }
 
     @Override
     public void run() {
-        writeAll();
+        readLogs.readLines(0, readLogs.getLines(), lineCallback);
     }
 
-    private void writeAll() {
-        long lines = readLogs.getLines();
-        for (int i = 0; i < lines; i++) {
-            writeLine(readLogs.getLineStr(i));
-        }
-    }
 }
