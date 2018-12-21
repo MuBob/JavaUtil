@@ -68,15 +68,6 @@ public class ReadState {
         }
     }
 
-    public static final synchronized int getState(LogRead readRunnable) {
-        return readRunnable.readState.get();
-    }
-
-    public static final synchronized void setState(LogRead readRunnable,@STATE int state) {
-        readRunnable.readState.set(state);
-    }
-
-
     @Retention(RetentionPolicy.SOURCE)
     public @interface IntDef {
 

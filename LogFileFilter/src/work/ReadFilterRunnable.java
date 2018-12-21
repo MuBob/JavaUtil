@@ -1,52 +1,78 @@
 package work;
 
+import content.Path;
 import util.Log;
 import work.inter.LogLineCallback;
-import work.inter.LogReadCallback;
 
 import static work.ReadState.*;
 
-public class ReadFilterRunnable extends LogRead implements Runnable, LogReadCallback, LogLineCallback {
+public class ReadFilterRunnable extends LogRead implements Runnable, LogLineCallback {
     private LogFilter filter;
     private LogWrite writeFilter;
     private long readLineFrom;
     private long readLineLength;
-    private LogReadCallback callback;
+    private ReadFilterRunnable parentReadRunnable;
 
-    public ReadFilterRunnable(String fileName, LogFilter filter, LogWrite writeFilter, long readLineFrom, long readLineLength, LogReadCallback logCallback) {
+    public ReadFilterRunnable(String fileName, LogFilter filter, LogWrite writeFilter, long readLineFrom, long readLineLength, ReadFilterRunnable parentRead) {
+        this(fileName, filter, writeFilter, readLineFrom, readLineLength);
+        this.parentReadRunnable=parentRead;
+    }
+
+    public ReadFilterRunnable(String fileName, LogFilter filter, LogWrite writeFilter, long readLineFrom, long readLineLength) {
         super(fileName);
         this.readLineFrom = readLineFrom;
         this.readLineLength = readLineLength;
         this.filter=filter;
         this.writeFilter=writeFilter;
-        this.callback=logCallback;
     }
 
+    public ReadFilterRunnable getParentRead() {
+        return parentReadRunnable;
+    }
+
+    public void setParentRead(ReadFilterRunnable parentRead) {
+        this.parentReadRunnable = parentRead;
+    }
 
     @Override
     public void run() {
-        readState.set(STATE_DO_MYSELF);
+        setState(STATE_DO_MYSELF);
         readLines(readLineFrom, readLineLength, this);
     }
 
     @Override
-    public void onReadLine(String fileName, int line, String content) {
+    public void onReadLine(String fileName, long line, String content) {
         if (content!=null&&content.contains(filter.getMatchWord())){
             writeFilter.writeLine(line+" "+content);
         }
     }
+    ReadAllRunnable readAllRunnable;
+    LogWrite writeAllRunnable;
+
     @Override
-    public void afterReadLine(String fileName, int lines) {
-        setState(this, STATE_POST_PARENT);
-        if (callback!=null){
-            //还要给上级汇报，继续做
-            callback.onComplete(this, writeFilter.getOutName());
-        }
-        while(getState(this)==STATE_FULL_RECEIVE_CHILD){
+    public void afterReadLine(String fileName, long lines) {
+        stPostParent();
+        doPostParent(this, writeFilter.getOutName());
+        while(getState()==STATE_FULL_RECEIVE_CHILD){
 
         }
-        setState(this, STATE_EMPTY_WAIT_CHILD);
+        stEmptyWait();
         //那我自己可以清空文件了，如果下级再有提交直接传给上级
+        doEndMyself();
+    }
+
+    private void doPostParent(ReadFilterRunnable readRunnable, String fileName) {
+        if (parentReadRunnable!=null){
+            //还要给上级汇报，继续做
+            parentReadRunnable.onComplete(readRunnable, fileName);
+        }else{
+            writeAllRunnable=new LogWrite(Path.getOutPath(), true);
+            readAllRunnable=new ReadAllRunnable(fileName, new ReadAllCallback(writeAllRunnable));
+            readAllRunnable.run();
+        }
+    }
+
+    private void doEndMyself() {
         writeFilter.afterWrite();
         Thread.currentThread().interrupt();
     }
@@ -58,83 +84,96 @@ public class ReadFilterRunnable extends LogRead implements Runnable, LogReadCall
      * @param myReadRunnable
      * @param readFileName
      */
-    @Override
-    public void onComplete(LogRead myReadRunnable, String readFileName) {
+    public void onComplete(ReadFilterRunnable myReadRunnable, String readFileName) {
         lastState=STATE_DEFAULT;
         while (true){
-            synchronized (this) {
-
-                int rState = getState(this);
+                int rState = getState();
                 if (lastState != rState) {
-                    Log.i("\t\t\t来自：" + readFileName + ", 状态：" + getStateStr(getState(myReadRunnable)));
+                    Log.i("\t\t\t来自：" + readFileName + ", 状态：" + getStateStr(myReadRunnable.getState()));
                     Log.i("\t\t\t\t\t上级：" + writeFilter.getOutName() + ". 状态：" + getStateStr(rState));
                 }
                 lastState = rState;
                 if (rState == STATE_DO_MYSELF) {
                     //上级正在做，自己等会,通知我的下级可以先给我提交着
-                    if (getState(myReadRunnable) != STATE_FULL_RECEIVE_CHILD) {
-                        setState(myReadRunnable, STATE_FULL_WAIT_CHILD);
-                    }
+                    stayWait(myReadRunnable);
                     continue;
                 } else if (rState == STATE_POST_PARENT) {
                     //上级正在把他的文件提交到上级的上级线程中，我只能等着了
-                    if (getState(myReadRunnable) != STATE_FULL_RECEIVE_CHILD) {
-                        setState(myReadRunnable, STATE_FULL_WAIT_CHILD);
-                    }
+                    stayWait(myReadRunnable);
                     continue;
                 } else if (rState == STATE_EMPTY_WAIT_CHILD) {
                     //上级提交完了，他的文本已经空了，只能写给上级的上级了
-                    if (getState(myReadRunnable) == STATE_FULL_WAIT_CHILD) {
-                        setState(myReadRunnable, STATE_POST_PARENT);
-                    }
-                    if (getState(myReadRunnable) == STATE_POST_PARENT) {
-                        handlerUp(myReadRunnable, readFileName);
-                        break;
-                    }
-                    continue;
+                    boolean isHandler = handlerUp(myReadRunnable, readFileName);
+                    if (isHandler) break;
+                    else continue;
                 } else if (rState == STATE_FULL_WAIT_CHILD) {
                     //上级正在等待给上级的上级提交中。我先给上级提交
-                    int mState = getState(myReadRunnable);
-                    if (mState == STATE_POST_PARENT || mState == STATE_FULL_WAIT_CHILD) {
-                        writeUp(myReadRunnable, readFileName);
-                    }
-                    continue;
+                    boolean isWrite = writeUp(myReadRunnable, readFileName);
+                    if (isWrite) break;
+                    else continue;
                 } else if (rState == STATE_FULL_RECEIVE_CHILD) {
                     //do nothing
                     continue;
                 } else if (rState == STATE_FULL_RECEIVE_CHILD_END) {
                     //do nothing
-                    setState(ReadFilterRunnable.this, STATE_FULL_WAIT_CHILD);
+                    stFullWait();
                     break;
                 }
-            }
         }
     }
 
-    private void writeUp(LogRead myRunnable, String readFileName) {
-        setState(ReadFilterRunnable.this, STATE_FULL_RECEIVE_CHILD);
-        ReadAllRunnable readAll=new ReadAllRunnable(readFileName, new LogLineCallback() {
-            @Override
-            public void onReadLine(String fileName, int line, String content) {
-                writeFilter.writeLine(content);
-            }
+    private synchronized boolean stayWait(LogRead myReadRunnable) {
+        int state = getState();
+        if (state!=STATE_POST_PARENT||state!=STATE_DO_MYSELF) return false;
+        if (myReadRunnable.getState() != STATE_FULL_RECEIVE_CHILD) {
+            myReadRunnable.stFullWait();
+            return true;
+        }
+        return false;
+    }
 
-            @Override
-            public void afterReadLine(String fileName, int line) {
-                if (getState(ReadFilterRunnable.this)==STATE_FULL_RECEIVE_CHILD){
-                    setState(ReadFilterRunnable.this, STATE_FULL_RECEIVE_CHILD_END);
+
+    private synchronized boolean writeUp(LogRead myRunnable, String readFileName) {
+        if (getState()!=STATE_FULL_WAIT_CHILD) return false;
+        int mState=myRunnable.getState();
+        if (mState==STATE_POST_PARENT||mState == STATE_FULL_WAIT_CHILD) {
+            stFullReceive();
+            myRunnable.stPostParent();
+            ReadAllRunnable readAll=new ReadAllRunnable(readFileName, new LogLineCallback() {
+                @Override
+                public void onReadLine(String fileName, long line, String content) {
+                    writeFilter.writeLine(content);
                 }
 
-            }
-        });
-        readAll.run();
+                @Override
+                public void afterReadLine(String fileName, long line) {
+                    int s=getState();
+                    Log.i("中和文件来自："+fileName+", 并入："+writeFilter.getOutName()+", 剩余数量="+ReadThread.getInstance().decrementThreadCount());
+                    if (s==STATE_FULL_RECEIVE_CHILD){
+                        stFullReceiveEnd();
+                    }
+                    myRunnable.stEmptyWait();
+                }
+            });
+            readAll.run();
+            return true;
+        }else if (mState==STATE_EMPTY_WAIT_CHILD){
+            return true;
+        }
+        return false;
     }
 
-    private void handlerUp(LogRead readRunnable, String readFileName) {
-        if (callback!=null) {
-            callback.onComplete(readRunnable, readFileName);
+    private synchronized boolean handlerUp(ReadFilterRunnable myRunnable, String readFileName) {
+        if (getState()!=STATE_EMPTY_WAIT_CHILD) return false;
+        if (myRunnable.getState() == STATE_FULL_WAIT_CHILD) {
+            myRunnable.stPostParent();
         }
-        readRunnable.readState.set(4);
+        if (myRunnable.getState() == STATE_POST_PARENT) {
+            doPostParent(myRunnable, readFileName);
+            myRunnable.stEmptyWait();
+            return true;
+        }
+        return false;
     }
 
 }

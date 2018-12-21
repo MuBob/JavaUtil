@@ -1,6 +1,6 @@
 package work.inter;
 
 public interface LogLineCallback {
-    void onReadLine(String fileName, int line, String content);
-    void afterReadLine(String fileName, int line);
+    void onReadLine(String fileName, long line, String content);
+    void afterReadLine(String fileName, long line);
 }
