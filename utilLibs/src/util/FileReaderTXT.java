@@ -129,7 +129,7 @@ public class FileReaderTXT {
         try {
             reader = new BufferedReader(new FileReader(file));
             String tempString = null;
-            int curLine = 0;
+            long curLine = 0;
             // 一次读入一行，直到读入null为文件结束
             while ((tempString = reader.readLine()) != null) {
                 callback.onFileReadLine(++curLine, tempString);
@@ -155,7 +155,7 @@ public class FileReaderTXT {
         try {
             reader = new BufferedReader(new FileReader(file));
             String tempString = null;
-            int curLine = 0;
+            long curLine = 0;
             // 一次读入一行，直到读入null为文件结束
             while ((tempString = reader.readLine()) != null) {
                 ++curLine;

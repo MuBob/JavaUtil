@@ -1,6 +1,6 @@
 package util;
 
 public interface FileReaderCallback {
-    void onFileReadLine(int line, String content);
-    void afterFileReadLine(String fileName, int lines);
+    void onFileReadLine(long line, String content);
+    void afterFileReadLine(String fileName, long lines);
 }
