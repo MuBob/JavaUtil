@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_javautil" default="compile.module.javautil">
+  <dirname property="module.javautil.basedir" file="${ant.file.module_javautil}"/>
+  
+  <property name="module.jdk.home.javautil" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.javautil" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.javautil" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.javautil" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="javautil.output.dir" value="${module.javautil.basedir}/out/production/JavaUtil"/>
+  <property name="javautil.testoutput.dir" value="${module.javautil.basedir}/out/test/JavaUtil"/>
+  
+  <path id="javautil.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="javautil.module.production.classpath">
+    <path refid="${module.jdk.classpath.javautil}"/>
+    <path refid="library.kotlinjavaruntime.classpath"/>
+  </path>
+  
+  <path id="javautil.runtime.production.module.classpath">
+    <pathelement location="${javautil.output.dir}"/>
+    <path refid="library.kotlinjavaruntime.classpath"/>
+  </path>
+  
+  <path id="javautil.module.classpath">
+    <path refid="${module.jdk.classpath.javautil}"/>
+    <pathelement location="${javautil.output.dir}"/>
+    <path refid="library.kotlinjavaruntime.classpath"/>
+  </path>
+  
+  <path id="javautil.runtime.module.classpath">
+    <pathelement location="${javautil.testoutput.dir}"/>
+    <pathelement location="${javautil.output.dir}"/>
+    <path refid="library.kotlinjavaruntime.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.javautil">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.javautil">
+    <patternset refid="excluded.from.module.javautil"/>
+  </patternset>
+  
+  
+  <target name="compile.module.javautil" depends="compile.module.javautil.production,compile.module.javautil.tests" description="Compile module JavaUtil"/>
+  
+  <target name="compile.module.javautil.production" depends="register.custom.compilers" description="Compile module JavaUtil; production classes"/>
+  
+  <target name="compile.module.javautil.tests" depends="register.custom.compilers,compile.module.javautil.production" description="compile module JavaUtil; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.javautil" description="cleanup module">
+    <delete dir="${javautil.output.dir}"/>
+    <delete dir="${javautil.testoutput.dir}"/>
+  </target>
+</project>

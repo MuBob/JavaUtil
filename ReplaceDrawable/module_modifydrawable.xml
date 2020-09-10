@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_modifydrawable" default="compile.module.modifydrawable">
+  <dirname property="module.modifydrawable.basedir" file="${ant.file.module_modifydrawable}"/>
+  
+  <property name="module.jdk.home.modifydrawable" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.modifydrawable" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.modifydrawable" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.modifydrawable" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="modifydrawable.output.dir" value="${module.modifydrawable.basedir}/../out/production/ModifyDrawable"/>
+  <property name="modifydrawable.testoutput.dir" value="${module.modifydrawable.basedir}/../out/test/ModifyDrawable"/>
+  
+  <path id="modifydrawable.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="modifydrawable.module.production.classpath">
+    <path refid="${module.jdk.classpath.modifydrawable}"/>
+    <path refid="library.kotlinjavaruntime_(2).classpath"/>
+  </path>
+  
+  <path id="modifydrawable.runtime.production.module.classpath">
+    <pathelement location="${modifydrawable.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(2).classpath"/>
+  </path>
+  
+  <path id="modifydrawable.module.classpath">
+    <path refid="${module.jdk.classpath.modifydrawable}"/>
+    <pathelement location="${modifydrawable.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(2).classpath"/>
+  </path>
+  
+  <path id="modifydrawable.runtime.module.classpath">
+    <pathelement location="${modifydrawable.testoutput.dir}"/>
+    <pathelement location="${modifydrawable.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(2).classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.modifydrawable">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.modifydrawable">
+    <patternset refid="excluded.from.module.modifydrawable"/>
+  </patternset>
+  
+  <path id="modifydrawable.module.sourcepath">
+    <dirset dir="${module.modifydrawable.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.modifydrawable" depends="compile.module.modifydrawable.production,compile.module.modifydrawable.tests" description="Compile module ModifyDrawable"/>
+  
+  <target name="compile.module.modifydrawable.production" depends="register.custom.compilers" description="Compile module ModifyDrawable; production classes">
+    <mkdir dir="${modifydrawable.output.dir}"/>
+    <javac2 destdir="${modifydrawable.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.modifydrawable}/javac">
+      <compilerarg line="${compiler.args.modifydrawable}"/>
+      <bootclasspath refid="modifydrawable.module.bootclasspath"/>
+      <classpath refid="modifydrawable.module.production.classpath"/>
+      <src refid="modifydrawable.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.modifydrawable"/>
+    </javac2>
+    
+    <copy todir="${modifydrawable.output.dir}">
+      <fileset dir="${module.modifydrawable.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.modifydrawable.tests" depends="register.custom.compilers,compile.module.modifydrawable.production" description="compile module ModifyDrawable; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.modifydrawable" description="cleanup module">
+    <delete dir="${modifydrawable.output.dir}"/>
+    <delete dir="${modifydrawable.testoutput.dir}"/>
+  </target>
+</project>

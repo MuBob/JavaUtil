@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_gloablereplaces" default="compile.module.gloablereplaces">
+  <dirname property="module.gloablereplaces.basedir" file="${ant.file.module_gloablereplaces}"/>
+  
+  <property name="module.jdk.home.gloablereplaces" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.gloablereplaces" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.gloablereplaces" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.gloablereplaces" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="gloablereplaces.output.dir" value="${module.gloablereplaces.basedir}/../out/production/GloableReplaces"/>
+  <property name="gloablereplaces.testoutput.dir" value="${module.gloablereplaces.basedir}/../out/test/GloableReplaces"/>
+  
+  <path id="gloablereplaces.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="gloablereplaces.module.production.classpath">
+    <path refid="${module.jdk.classpath.gloablereplaces}"/>
+    <path refid="library.kotlinjavaruntime_(3).classpath"/>
+  </path>
+  
+  <path id="gloablereplaces.runtime.production.module.classpath">
+    <pathelement location="${gloablereplaces.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(3).classpath"/>
+  </path>
+  
+  <path id="gloablereplaces.module.classpath">
+    <path refid="${module.jdk.classpath.gloablereplaces}"/>
+    <pathelement location="${gloablereplaces.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(3).classpath"/>
+  </path>
+  
+  <path id="gloablereplaces.runtime.module.classpath">
+    <pathelement location="${gloablereplaces.testoutput.dir}"/>
+    <pathelement location="${gloablereplaces.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(3).classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.gloablereplaces">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.gloablereplaces">
+    <patternset refid="excluded.from.module.gloablereplaces"/>
+  </patternset>
+  
+  <path id="gloablereplaces.module.sourcepath">
+    <dirset dir="${module.gloablereplaces.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.gloablereplaces" depends="compile.module.gloablereplaces.production,compile.module.gloablereplaces.tests" description="Compile module GloableReplaces"/>
+  
+  <target name="compile.module.gloablereplaces.production" depends="register.custom.compilers" description="Compile module GloableReplaces; production classes">
+    <mkdir dir="${gloablereplaces.output.dir}"/>
+    <javac2 destdir="${gloablereplaces.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.gloablereplaces}/javac">
+      <compilerarg line="${compiler.args.gloablereplaces}"/>
+      <bootclasspath refid="gloablereplaces.module.bootclasspath"/>
+      <classpath refid="gloablereplaces.module.production.classpath"/>
+      <src refid="gloablereplaces.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.gloablereplaces"/>
+    </javac2>
+    
+    <copy todir="${gloablereplaces.output.dir}">
+      <fileset dir="${module.gloablereplaces.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.gloablereplaces.tests" depends="register.custom.compilers,compile.module.gloablereplaces.production" description="compile module GloableReplaces; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.gloablereplaces" description="cleanup module">
+    <delete dir="${gloablereplaces.output.dir}"/>
+    <delete dir="${gloablereplaces.testoutput.dir}"/>
+  </target>
+</project>

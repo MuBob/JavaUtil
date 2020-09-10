@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_strconvert" default="compile.module.strconvert">
+  <dirname property="module.strconvert.basedir" file="${ant.file.module_strconvert}"/>
+  
+  <property name="module.jdk.home.strconvert" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.strconvert" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.strconvert" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.strconvert" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="strconvert.output.dir" value="${module.strconvert.basedir}/../out/production/StrConvert"/>
+  <property name="strconvert.testoutput.dir" value="${module.strconvert.basedir}/../out/test/StrConvert"/>
+  
+  <path id="strconvert.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="strconvert.module.production.classpath">
+    <path refid="${module.jdk.classpath.strconvert}"/>
+  </path>
+  
+  <path id="strconvert.runtime.production.module.classpath">
+    <pathelement location="${strconvert.output.dir}"/>
+  </path>
+  
+  <path id="strconvert.module.classpath">
+    <path refid="${module.jdk.classpath.strconvert}"/>
+    <pathelement location="${strconvert.output.dir}"/>
+  </path>
+  
+  <path id="strconvert.runtime.module.classpath">
+    <pathelement location="${strconvert.testoutput.dir}"/>
+    <pathelement location="${strconvert.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.strconvert">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.strconvert">
+    <patternset refid="excluded.from.module.strconvert"/>
+  </patternset>
+  
+  <path id="strconvert.module.sourcepath">
+    <dirset dir="${module.strconvert.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.strconvert" depends="compile.module.strconvert.production,compile.module.strconvert.tests" description="Compile module StrConvert"/>
+  
+  <target name="compile.module.strconvert.production" depends="register.custom.compilers" description="Compile module StrConvert; production classes">
+    <mkdir dir="${strconvert.output.dir}"/>
+    <javac2 destdir="${strconvert.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.strconvert}/javac">
+      <compilerarg line="${compiler.args.strconvert}"/>
+      <bootclasspath refid="strconvert.module.bootclasspath"/>
+      <classpath refid="strconvert.module.production.classpath"/>
+      <src refid="strconvert.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.strconvert"/>
+    </javac2>
+    
+    <copy todir="${strconvert.output.dir}">
+      <fileset dir="${module.strconvert.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.strconvert.tests" depends="register.custom.compilers,compile.module.strconvert.production" description="compile module StrConvert; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.strconvert" description="cleanup module">
+    <delete dir="${strconvert.output.dir}"/>
+    <delete dir="${strconvert.testoutput.dir}"/>
+  </target>
+</project>

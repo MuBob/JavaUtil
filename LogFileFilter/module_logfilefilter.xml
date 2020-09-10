@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_logfilefilter" default="compile.module.logfilefilter">
+  <dirname property="module.logfilefilter.basedir" file="${ant.file.module_logfilefilter}"/>
+  
+  <property name="module.jdk.home.logfilefilter" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.logfilefilter" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.logfilefilter" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.logfilefilter" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="logfilefilter.output.dir" value="${module.logfilefilter.basedir}/../out/production/LogFileFilter"/>
+  <property name="logfilefilter.testoutput.dir" value="${module.logfilefilter.basedir}/../out/test/LogFileFilter"/>
+  
+  <path id="logfilefilter.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="logfilefilter.module.production.classpath">
+    <path refid="${module.jdk.classpath.logfilefilter}"/>
+    <pathelement location="${utillibs.output.dir}"/>
+  </path>
+  
+  <path id="logfilefilter.runtime.production.module.classpath">
+    <pathelement location="${logfilefilter.output.dir}"/>
+    <path refid="utillibs.runtime.production.module.classpath"/>
+  </path>
+  
+  <path id="logfilefilter.module.classpath">
+    <path refid="${module.jdk.classpath.logfilefilter}"/>
+    <pathelement location="${logfilefilter.output.dir}"/>
+    <pathelement location="${utillibs.testoutput.dir}"/>
+    <pathelement location="${utillibs.output.dir}"/>
+  </path>
+  
+  <path id="logfilefilter.runtime.module.classpath">
+    <pathelement location="${logfilefilter.testoutput.dir}"/>
+    <pathelement location="${logfilefilter.output.dir}"/>
+    <path refid="utillibs.runtime.module.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.logfilefilter">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.logfilefilter">
+    <patternset refid="excluded.from.module.logfilefilter"/>
+  </patternset>
+  
+  <path id="logfilefilter.module.sourcepath">
+    <dirset dir="${module.logfilefilter.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.logfilefilter" depends="compile.module.logfilefilter.production,compile.module.logfilefilter.tests" description="Compile module LogFileFilter"/>
+  
+  <target name="compile.module.logfilefilter.production" depends="register.custom.compilers,compile.module.utillibs" description="Compile module LogFileFilter; production classes">
+    <mkdir dir="${logfilefilter.output.dir}"/>
+    <javac2 destdir="${logfilefilter.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.logfilefilter}/javac">
+      <compilerarg line="${compiler.args.logfilefilter}"/>
+      <bootclasspath refid="logfilefilter.module.bootclasspath"/>
+      <classpath refid="logfilefilter.module.production.classpath"/>
+      <src refid="logfilefilter.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.logfilefilter"/>
+    </javac2>
+    
+    <copy todir="${logfilefilter.output.dir}">
+      <fileset dir="${module.logfilefilter.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.logfilefilter.tests" depends="register.custom.compilers,compile.module.logfilefilter.production" description="compile module LogFileFilter; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.logfilefilter" description="cleanup module">
+    <delete dir="${logfilefilter.output.dir}"/>
+    <delete dir="${logfilefilter.testoutput.dir}"/>
+  </target>
+</project>

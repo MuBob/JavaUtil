@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_renamefiles" default="compile.module.renamefiles">
+  <dirname property="module.renamefiles.basedir" file="${ant.file.module_renamefiles}"/>
+  
+  <property name="module.jdk.home.renamefiles" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.renamefiles" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.renamefiles" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.renamefiles" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="renamefiles.output.dir" value="${module.renamefiles.basedir}/../out/production/RenameFiles"/>
+  <property name="renamefiles.testoutput.dir" value="${module.renamefiles.basedir}/../out/test/RenameFiles"/>
+  
+  <path id="renamefiles.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="renamefiles.module.production.classpath">
+    <path refid="${module.jdk.classpath.renamefiles}"/>
+    <path refid="library.kotlinjavaruntime_(4).classpath"/>
+    <pathelement location="${utillibs.output.dir}"/>
+  </path>
+  
+  <path id="renamefiles.runtime.production.module.classpath">
+    <pathelement location="${renamefiles.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(4).classpath"/>
+    <path refid="utillibs.runtime.production.module.classpath"/>
+  </path>
+  
+  <path id="renamefiles.module.classpath">
+    <path refid="${module.jdk.classpath.renamefiles}"/>
+    <pathelement location="${renamefiles.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(4).classpath"/>
+    <pathelement location="${utillibs.testoutput.dir}"/>
+    <pathelement location="${utillibs.output.dir}"/>
+  </path>
+  
+  <path id="renamefiles.runtime.module.classpath">
+    <pathelement location="${renamefiles.testoutput.dir}"/>
+    <pathelement location="${renamefiles.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(4).classpath"/>
+    <path refid="utillibs.runtime.module.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.renamefiles">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.renamefiles">
+    <patternset refid="excluded.from.module.renamefiles"/>
+  </patternset>
+  
+  <path id="renamefiles.module.sourcepath">
+    <dirset dir="${module.renamefiles.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.renamefiles" depends="compile.module.renamefiles.production,compile.module.renamefiles.tests" description="Compile module RenameFiles"/>
+  
+  <target name="compile.module.renamefiles.production" depends="register.custom.compilers,compile.module.utillibs" description="Compile module RenameFiles; production classes">
+    <mkdir dir="${renamefiles.output.dir}"/>
+    <javac2 destdir="${renamefiles.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.renamefiles}/javac">
+      <compilerarg line="${compiler.args.renamefiles}"/>
+      <bootclasspath refid="renamefiles.module.bootclasspath"/>
+      <classpath refid="renamefiles.module.production.classpath"/>
+      <src refid="renamefiles.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.renamefiles"/>
+    </javac2>
+    
+    <copy todir="${renamefiles.output.dir}">
+      <fileset dir="${module.renamefiles.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.renamefiles.tests" depends="register.custom.compilers,compile.module.renamefiles.production" description="compile module RenameFiles; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.renamefiles" description="cleanup module">
+    <delete dir="${renamefiles.output.dir}"/>
+    <delete dir="${renamefiles.testoutput.dir}"/>
+  </target>
+</project>

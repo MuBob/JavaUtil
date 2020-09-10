@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_readso" default="compile.module.readso">
+  <dirname property="module.readso.basedir" file="${ant.file.module_readso}"/>
+  
+  <property name="module.jdk.home.readso" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.readso" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.readso" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.readso" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="readso.output.dir" value="${module.readso.basedir}/../out/production/ReadSo"/>
+  <property name="readso.testoutput.dir" value="${module.readso.basedir}/../out/test/ReadSo"/>
+  
+  <path id="readso.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="readso.module.production.classpath">
+    <path refid="${module.jdk.classpath.readso}"/>
+  </path>
+  
+  <path id="readso.runtime.production.module.classpath">
+    <pathelement location="${readso.output.dir}"/>
+  </path>
+  
+  <path id="readso.module.classpath">
+    <path refid="${module.jdk.classpath.readso}"/>
+    <pathelement location="${readso.output.dir}"/>
+  </path>
+  
+  <path id="readso.runtime.module.classpath">
+    <pathelement location="${readso.testoutput.dir}"/>
+    <pathelement location="${readso.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.readso">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.readso">
+    <patternset refid="excluded.from.module.readso"/>
+  </patternset>
+  
+  <path id="readso.module.sourcepath">
+    <dirset dir="${module.readso.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.readso" depends="compile.module.readso.production,compile.module.readso.tests" description="Compile module ReadSo"/>
+  
+  <target name="compile.module.readso.production" depends="register.custom.compilers" description="Compile module ReadSo; production classes">
+    <mkdir dir="${readso.output.dir}"/>
+    <javac2 destdir="${readso.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.readso}/javac">
+      <compilerarg line="${compiler.args.readso}"/>
+      <bootclasspath refid="readso.module.bootclasspath"/>
+      <classpath refid="readso.module.production.classpath"/>
+      <src refid="readso.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.readso"/>
+    </javac2>
+    
+    <copy todir="${readso.output.dir}">
+      <fileset dir="${module.readso.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.readso.tests" depends="register.custom.compilers,compile.module.readso.production" description="compile module ReadSo; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.readso" description="cleanup module">
+    <delete dir="${readso.output.dir}"/>
+    <delete dir="${readso.testoutput.dir}"/>
+  </target>
+</project>

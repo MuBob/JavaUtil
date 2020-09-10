@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_netrequest" default="compile.module.netrequest">
+  <dirname property="module.netrequest.basedir" file="${ant.file.module_netrequest}"/>
+  
+  <property name="module.jdk.home.netrequest" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.netrequest" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.netrequest" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.netrequest" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="netrequest.output.dir" value="${module.netrequest.basedir}/../out/production/NetRequest"/>
+  <property name="netrequest.testoutput.dir" value="${module.netrequest.basedir}/../out/test/NetRequest"/>
+  
+  <path id="netrequest.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="netrequest.module.production.classpath">
+    <path refid="${module.jdk.classpath.netrequest}"/>
+    <path refid="library.kotlinjavaruntime_(5).classpath"/>
+    <path refid="library.okhttp-3.6.0.classpath"/>
+    <path refid="library.json-20080701.classpath"/>
+    <path refid="library.okhttputils-2_3_9.classpath"/>
+    <path refid="library.android-4.1.1.4.classpath"/>
+    <path refid="library.okio-1.10.0.classpath"/>
+    <path refid="library.httpclient-4.5.3.classpath"/>
+  </path>
+  
+  <path id="netrequest.runtime.production.module.classpath">
+    <pathelement location="${netrequest.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(5).classpath"/>
+    <path refid="library.okhttp-3.6.0.classpath"/>
+    <path refid="library.json-20080701.classpath"/>
+    <path refid="library.okhttputils-2_3_9.classpath"/>
+    <path refid="library.android-4.1.1.4.classpath"/>
+    <path refid="library.okio-1.10.0.classpath"/>
+    <path refid="library.httpclient-4.5.3.classpath"/>
+  </path>
+  
+  <path id="netrequest.module.classpath">
+    <path refid="${module.jdk.classpath.netrequest}"/>
+    <pathelement location="${netrequest.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(5).classpath"/>
+    <path refid="library.okhttp-3.6.0.classpath"/>
+    <path refid="library.json-20080701.classpath"/>
+    <path refid="library.okhttputils-2_3_9.classpath"/>
+    <path refid="library.android-4.1.1.4.classpath"/>
+    <path refid="library.okio-1.10.0.classpath"/>
+    <path refid="library.httpclient-4.5.3.classpath"/>
+  </path>
+  
+  <path id="netrequest.runtime.module.classpath">
+    <pathelement location="${netrequest.testoutput.dir}"/>
+    <pathelement location="${netrequest.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(5).classpath"/>
+    <path refid="library.okhttp-3.6.0.classpath"/>
+    <path refid="library.json-20080701.classpath"/>
+    <path refid="library.okhttputils-2_3_9.classpath"/>
+    <path refid="library.android-4.1.1.4.classpath"/>
+    <path refid="library.okio-1.10.0.classpath"/>
+    <path refid="library.httpclient-4.5.3.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.netrequest">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.netrequest">
+    <patternset refid="excluded.from.module.netrequest"/>
+  </patternset>
+  
+  <path id="netrequest.module.sourcepath">
+    <dirset dir="${module.netrequest.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.netrequest" depends="compile.module.netrequest.production,compile.module.netrequest.tests" description="Compile module NetRequest"/>
+  
+  <target name="compile.module.netrequest.production" depends="register.custom.compilers" description="Compile module NetRequest; production classes">
+    <mkdir dir="${netrequest.output.dir}"/>
+    <javac2 destdir="${netrequest.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.netrequest}/javac">
+      <compilerarg line="${compiler.args.netrequest}"/>
+      <bootclasspath refid="netrequest.module.bootclasspath"/>
+      <classpath refid="netrequest.module.production.classpath"/>
+      <src refid="netrequest.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.netrequest"/>
+    </javac2>
+    
+    <copy todir="${netrequest.output.dir}">
+      <fileset dir="${module.netrequest.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.netrequest.tests" depends="register.custom.compilers,compile.module.netrequest.production" description="compile module NetRequest; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.netrequest" description="cleanup module">
+    <delete dir="${netrequest.output.dir}"/>
+    <delete dir="${netrequest.testoutput.dir}"/>
+  </target>
+</project>

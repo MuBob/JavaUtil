@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_deleterownumber" default="compile.module.deleterownumber">
+  <dirname property="module.deleterownumber.basedir" file="${ant.file.module_deleterownumber}"/>
+  
+  <property name="module.jdk.home.deleterownumber" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.deleterownumber" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.deleterownumber" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.deleterownumber" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="deleterownumber.output.dir" value="${module.deleterownumber.basedir}/../out/production/DeleteRowNumber"/>
+  <property name="deleterownumber.testoutput.dir" value="${module.deleterownumber.basedir}/../out/test/DeleteRowNumber"/>
+  
+  <path id="deleterownumber.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="deleterownumber.module.production.classpath">
+    <path refid="${module.jdk.classpath.deleterownumber}"/>
+    <path refid="library.kotlinjavaruntime_(7).classpath"/>
+    <pathelement location="${utillibs.output.dir}"/>
+  </path>
+  
+  <path id="deleterownumber.runtime.production.module.classpath">
+    <pathelement location="${deleterownumber.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(7).classpath"/>
+    <path refid="utillibs.runtime.production.module.classpath"/>
+  </path>
+  
+  <path id="deleterownumber.module.classpath">
+    <path refid="${module.jdk.classpath.deleterownumber}"/>
+    <pathelement location="${deleterownumber.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(7).classpath"/>
+    <pathelement location="${utillibs.testoutput.dir}"/>
+    <pathelement location="${utillibs.output.dir}"/>
+  </path>
+  
+  <path id="deleterownumber.runtime.module.classpath">
+    <pathelement location="${deleterownumber.testoutput.dir}"/>
+    <pathelement location="${deleterownumber.output.dir}"/>
+    <path refid="library.kotlinjavaruntime_(7).classpath"/>
+    <path refid="utillibs.runtime.module.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.deleterownumber">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.deleterownumber">
+    <patternset refid="excluded.from.module.deleterownumber"/>
+  </patternset>
+  
+  <path id="deleterownumber.module.sourcepath">
+    <dirset dir="${module.deleterownumber.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.deleterownumber" depends="compile.module.deleterownumber.production,compile.module.deleterownumber.tests" description="Compile module DeleteRowNumber"/>
+  
+  <target name="compile.module.deleterownumber.production" depends="register.custom.compilers,compile.module.utillibs" description="Compile module DeleteRowNumber; production classes">
+    <mkdir dir="${deleterownumber.output.dir}"/>
+    <javac2 destdir="${deleterownumber.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.deleterownumber}/javac">
+      <compilerarg line="${compiler.args.deleterownumber}"/>
+      <bootclasspath refid="deleterownumber.module.bootclasspath"/>
+      <classpath refid="deleterownumber.module.production.classpath"/>
+      <src refid="deleterownumber.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.deleterownumber"/>
+    </javac2>
+    
+    <copy todir="${deleterownumber.output.dir}">
+      <fileset dir="${module.deleterownumber.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.deleterownumber.tests" depends="register.custom.compilers,compile.module.deleterownumber.production" description="compile module DeleteRowNumber; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.deleterownumber" description="cleanup module">
+    <delete dir="${deleterownumber.output.dir}"/>
+    <delete dir="${deleterownumber.testoutput.dir}"/>
+  </target>
+</project>

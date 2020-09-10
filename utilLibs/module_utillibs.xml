@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_utillibs" default="compile.module.utillibs">
+  <dirname property="module.utillibs.basedir" file="${ant.file.module_utillibs}"/>
+  
+  <property name="module.jdk.home.utillibs" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.utillibs" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.utillibs" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.utillibs" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="utillibs.output.dir" value="${module.utillibs.basedir}/../out/production/utilLibs"/>
+  <property name="utillibs.testoutput.dir" value="${module.utillibs.basedir}/../out/test/utilLibs"/>
+  
+  <path id="utillibs.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="utillibs.module.production.classpath">
+    <path refid="${module.jdk.classpath.utillibs}"/>
+  </path>
+  
+  <path id="utillibs.runtime.production.module.classpath">
+    <pathelement location="${utillibs.output.dir}"/>
+  </path>
+  
+  <path id="utillibs.module.classpath">
+    <path refid="${module.jdk.classpath.utillibs}"/>
+    <pathelement location="${utillibs.output.dir}"/>
+  </path>
+  
+  <path id="utillibs.runtime.module.classpath">
+    <pathelement location="${utillibs.testoutput.dir}"/>
+    <pathelement location="${utillibs.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.utillibs">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.utillibs">
+    <patternset refid="excluded.from.module.utillibs"/>
+  </patternset>
+  
+  <path id="utillibs.module.sourcepath">
+    <dirset dir="${module.utillibs.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.utillibs" depends="compile.module.utillibs.production,compile.module.utillibs.tests" description="Compile module utilLibs"/>
+  
+  <target name="compile.module.utillibs.production" depends="register.custom.compilers" description="Compile module utilLibs; production classes">
+    <mkdir dir="${utillibs.output.dir}"/>
+    <javac2 destdir="${utillibs.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.utillibs}/javac">
+      <compilerarg line="${compiler.args.utillibs}"/>
+      <bootclasspath refid="utillibs.module.bootclasspath"/>
+      <classpath refid="utillibs.module.production.classpath"/>
+      <src refid="utillibs.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.utillibs"/>
+    </javac2>
+    
+    <copy todir="${utillibs.output.dir}">
+      <fileset dir="${module.utillibs.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.utillibs.tests" depends="register.custom.compilers,compile.module.utillibs.production" description="compile module utilLibs; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.utillibs" description="cleanup module">
+    <delete dir="${utillibs.output.dir}"/>
+    <delete dir="${utillibs.testoutput.dir}"/>
+  </target>
+</project>
